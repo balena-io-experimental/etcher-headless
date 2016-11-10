@@ -8,37 +8,37 @@
         this.initialized = false;
     };
 
-    ledStrip.prototype.ready = function() {
+    noneGui.prototype.ready = function() {
         "use strict";
         return true;
     };
 
-    ledStrip.prototype.write = function(i) {
+    noneGui.prototype.write = function(i) {
         "use strict";
         return true;
     };
 
-    ledStrip.prototype.verify = function(i) {
+    noneGui.prototype.verify = function(i) {
         "use strict";
         return true;
     };
 
-    ledStrip.prototype.done = function(i) {
+    noneGui.prototype.done = function(i) {
         "use strict";
         return true;
     };
 
-    ledStrip.prototype.dwnloadStart = function(i) {
+    noneGui.prototype.dwnloadStart = function(i) {
         "use strict";
         return true;
     };
 
-    ledStrip.prototype.dwnloadComplete = function(i) {
+    noneGui.prototype.dwnloadComplete = function(i) {
         "use strict";
         return true;
     };
 
-    ledStrip.prototype.dwnloadError = function(i) {
+    noneGui.prototype.dwnloadError = function(i) {
         "use strict";
         return true;
     };
