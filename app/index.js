@@ -45,9 +45,9 @@
     let progress = function(data) {
         "use strict";
         if (isWriting(data.state.type)) {
-            gui.write(identifyDevice(data.device,data.state.percentage));
+            gui.write(identifyDevice(data.device),data.state.percentage);
         } else {
-            gui.verify(identifyDevice(data.device,data.state.percentage));
+            gui.verify(identifyDevice(data.device),data.state.percentage);
         }
     };
 
