@@ -22,6 +22,7 @@ Variable Name | Default | Description
 ETCHER_IMAGE_URL | `NaN` | The UL from which etcher downloads the image to be flashed
 PORTAL_SSID | `ResinAP` | the SSID name of the Access Point the device spawns for WiFi configuration
 GUI_TYPE | `none` | the Feedback device to be used (for now, you can pick the [Pimoroni blinkt LED strip](https://shop.pimoroni.com/products/blinkt) setting `ledStrip`)
+DEBUG | `none` | comma separated modules list that activate verbose logging on the device dashboard (`main`)
 
 ## How it works
 The device downloads the image set via `ETCHER_IMAGE_URL` and then checks for new media attached - every time a new one is found, it flashes the downloaded image on it. Works in parallel so you can attach and flash multiple media at the same time.
