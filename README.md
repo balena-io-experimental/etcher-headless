@@ -1,5 +1,5 @@
 # etcher-headless
-[WIP] etcher-based automatic drive flashing device
+[WIP] [etcher](https://etcher.io) based automatic drive flashing device
 
 ## Getting started
 
