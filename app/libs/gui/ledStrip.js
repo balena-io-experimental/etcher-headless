@@ -24,14 +24,14 @@
         self.initialized = true;
     };
 
-    ledStrip.prototype.write = function(i) {
+    ledStrip.prototype.write = function(i,p) {
         "use strict";
         let self = this;
         leds.setPixel(i, 109, 9, 9, 0.3);
         leds.sendUpdate();
     };
 
-    ledStrip.prototype.verify = function(i) {
+    ledStrip.prototype.verify = function(i,p) {
         "use strict";
         let self = this;
         leds.setPixel(i, 91, 192, 222, 0.3);

@@ -13,12 +13,12 @@
         return true;
     };
 
-    noneGui.prototype.write = function(i) {
+    noneGui.prototype.write = function(i,p) {
         "use strict";
         return true;
     };
 
-    noneGui.prototype.verify = function(i) {
+    noneGui.prototype.verify = function(i,p) {
         "use strict";
         return true;
     };
