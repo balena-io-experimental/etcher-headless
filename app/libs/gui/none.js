@@ -28,17 +28,17 @@
         return true;
     };
 
-    noneGui.prototype.dwnloadStart = function(i) {
+    noneGui.prototype.downloadStart = function(i) {
         "use strict";
         return true;
     };
 
-    noneGui.prototype.dwnloadComplete = function(i) {
+    noneGui.prototype.downloadComplete = function(i) {
         "use strict";
         return true;
     };
 
-    noneGui.prototype.dwnloadError = function(i) {
+    noneGui.prototype.downloadError = function(i) {
         "use strict";
         return true;
     };

@@ -41,19 +41,19 @@
         leds.setPixel(i, 34, 132, 11, 0.3);
     };
 
-    ledStrip.prototype.dwnloadStart = function(i) {
+    ledStrip.prototype.downloadStart = function(i) {
         "use strict";
         let self = this;
         leds.setPixel(7, 91, 192, 222, 0.3);
     };
 
-    ledStrip.prototype.dwnloadComplete = function(i) {
+    ledStrip.prototype.downloadComplete = function(i) {
         "use strict";
         let self = this;
         leds.setPixel(7, 34, 132, 11, 0.3);
     };
 
-    ledStrip.prototype.dwnloadError = function(i) {
+    ledStrip.prototype.downloadError = function(i) {
         "use strict";
         let self = this;
         leds.setPixel(7, 109, 9, 9, 0.3);
