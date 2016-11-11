@@ -5,6 +5,8 @@ this project was hacked in a beautiful night during the resin.io 2016 session - 
 
 **It will likely change slightly and break until it reaches a more stable condition**
 
+![etcher-headless](https://pbs.twimg.com/media/Cw-PB1kW8AAEFhP.jpg:large)
+
 ## Getting started
 
 - Sign up on [resin.io](https://dashboard.resin.io/signup)
