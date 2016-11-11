@@ -1,6 +1,10 @@
 # etcher-headless
 [WIP] [etcher](https://etcher.io) based automatic drive flashing device
 
+this project was hacked in a beautiful night during the resin.io 2016 session - it still is a hack, aiming to be a proof-of-concept for automated multi-flashing device.
+
+**It will likely change slightly change and break until it reaches a more stable condition**
+
 ## Getting started
 
 - Sign up on [resin.io](https://dashboard.resin.io/signup)
