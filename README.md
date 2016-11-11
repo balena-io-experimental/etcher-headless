@@ -25,7 +25,7 @@ this project was hacked in a beautiful night during the resin.io 2016 session - 
 ## Configure via [environment variables](https://docs.resin.io/management/env-vars/)
 Variable Name | Default | Description
 ------------ | ------------- | -------------
-ETCHER_IMAGE_URL | `NaN` | The UL from which etcher downloads the image to be flashed
+ETCHER_IMAGE_URL | `NaN` | The URL from which etcher downloads the image to be flashed
 PORTAL_SSID | `ResinAP` | the SSID name of the Access Point the device spawns for WiFi configuration
 GUI_TYPE | `none` | the Feedback device to be used (for now, you can pick the [Pimoroni blinkt LED strip](https://shop.pimoroni.com/products/blinkt) setting `ledStrip`)
 DEBUG | `none` | comma separated modules list that activate verbose logging on the device dashboard (`main`)
