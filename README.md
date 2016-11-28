@@ -10,7 +10,7 @@ this project was hacked in a beautiful night during the resin.io 2016 session - 
 ## Getting started
 
 - Sign up on [resin.io](https://dashboard.resin.io/signup)
-- go throught the [getting started guide](http://docs.resin.io/raspberrypi/nodejs/getting-started/) and create a new Raspberry Pi 2/2+/3 application called `etcherHeadless`
+- go throught the [getting started guide](http://docs.resin.io/raspberrypi/nodejs/getting-started/) and create a new Raspberry Pi 1+/2/3 model B application called `etcherHeadless`
 - clone this repository to your local workspace
 - set these variables in the `Fleet Configuration` application side tab if you want to use a raspberry Pi
 
