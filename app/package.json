@@ -1,66 +1,53 @@
 {
-    "name": "etcher-headless",
-    "version": "0.0.1",
-    "description": "etcher-based automatic drive flashing device",
-    "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/resin-io-playground/etcher-headless.git"
-    },
-    "keywords": [
-        "etcher",
-        "io",
-        "resin",
-        "head",
-        "less",
-        "headless",
-        "drive",
-        "sd",
-        "card",
-        "micro",
-        "flash",
-        "burn",
-        "provision",
-        "device"
-    ],
-    "author": {
-        "name": "curcuz",
-        "email": "carlo@resin.io",
-        "url": "https://github.com/curcuz"
-    },
-    "contributors": [{
-        "name": "jviotti",
-        "email": "juan@resin.io",
-        "url": "https://github.com/jviotti"
-    }],
-    "license": "Apache-2.0",
-    "bugs": {
-        "url": "https://github.com/resin-io-playground/etcher-headless/issues"
-    },
-    "homepage": "https://github.com/resin-io-playground/etcher-headless#readme",
-    "jshintConfig": {
-        "esnext": true,
-        "strict": true
-    },
-    "dependencies": {
-        "bluebird": "^3.4.6",
-        "body-parser": "^1.15.2",
-        "bower": "^1.7.9",
-        "chalk": "^1.1.3",
-        "coffee-script": "~1.9.3",
-        "dbus": "^0.2.19",
-        "debug": "^2.3.0",
-        "download": "^5.0.2",
-        "drivelist": "^4.0.0",
-        "etcher-image-write": "^8.1.4",
-        "express": "^4.14.0",
-        "i2c": "^0.2.3",
-        "lodash": "^4.16.6",
-        "node-blinkt": "^1.0.1",
-        "request": "^2.78.0",
-        "umount": "^1.1.5"
-    }
+  "name": "etcher-headless",
+  "version": "0.0.1",
+  "description": "etcher-based automatic drive flashing device",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/resin-io-playground/etcher-headless.git"
+  },
+  "keywords": [
+    "etcher",
+    "io",
+    "resin",
+    "head",
+    "less",
+    "headless",
+    "drive",
+    "sd",
+    "card",
+    "micro",
+    "flash",
+    "burn",
+    "provision",
+    "device"
+  ],
+  "author": {
+    "name": "curcuz",
+    "email": "carlo@resin.io",
+    "url": "https://github.com/curcuz"
+  },
+  "contributors": [{
+    "name": "jviotti",
+    "email": "juan@resin.io",
+    "url": "https://github.com/jviotti"
+  },{
+    "name": "jhermsmeier",
+    "email": "jonas@resin.io",
+    "url": "https://github.com/jhermsmeier"
+  }],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/resin-io-playground/etcher-headless/issues"
+  },
+  "homepage": "https://github.com/resin-io-playground/etcher-headless#readme",
+  "jshintConfig": {
+    "esnext": true,
+    "strict": true
+  },
+  "dependencies": {}
 }
