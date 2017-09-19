@@ -25,7 +25,7 @@ const debug = require('debug')('block-read-stream')
 /* eslint-disable no-magic-numbers */
 
 const CHUNK_SIZE = 64 * 1024
-const MIN_CHUNK_SIZE = 512
+const MIN_CHUNK_SIZE = 4096
 
 /**
  * @summary BlockReadStream
@@ -90,7 +90,10 @@ class BlockReadStream extends stream.Readable {
       return
     }
 
-    const length = Math.min(CHUNK_SIZE, Math.max(MIN_CHUNK_SIZE, toRead))
+    let length = Math.min(CHUNK_SIZE, Math.max(MIN_CHUNK_SIZE, toRead))
+    length = Math.floor( length / MIN_CHUNK_SIZE ) * MIN_CHUNK_SIZE
+    length = Math.max( MIN_CHUNK_SIZE, length )
+    // console.log( length )
     const buffer = Buffer.alloc(length)
 
     /**
@@ -117,6 +120,7 @@ class BlockReadStream extends stream.Readable {
       this.push(buffer)
     }
 
+    // console.log( 'READ', this.position )
     this.fs.read(this.fd, buffer, 0, length, this.position, onRead)
     this.position += length
   }

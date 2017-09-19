@@ -6,6 +6,7 @@ var fs = require('fs')
 var path = require('path')
 var EventEmitter = require('events')
 var mountutils = require('mountutils')
+var MBR = require('mbr')
 
 var IMAGE_URL = process.env.IMAGE_URL
 
@@ -26,7 +27,6 @@ class Hub extends EventEmitter {
     super()
 
     this.processes = new Map()
-    this.devices = []
     this.blacklist = DRIVE_BLACKLIST || []
 
     this.running = true
@@ -57,7 +57,7 @@ class Hub extends EventEmitter {
       debug( 'drives %O', error || drives )
       this.update(drives)
       if( this.running ) {
-        // this.scan()
+        this.scan()
       }
     })
   }
@@ -99,68 +99,82 @@ class Hub extends EventEmitter {
     debug( 'start' )
   }
 
-  update(drives) {
-    drives.forEach((drive) => {
+  flash(drive) {
 
-      if( this.processes.has( drive.device ) ) {
-        var proc = this.processes.get( drive.device )
-        debug('update:bail', proc)
-        return
-      }
+    if( this.processes.has( drive.device ) ) {
+      var proc = this.processes.get( drive.device )
+      debug( 'update:bail', proc.drive )
+      return
+    }
 
-      var proc = new Process()
-      var image = {
-        stream: fs.createReadStream( this.filename ),
-        size: {
-          original: this.imageSize,
-          final: {
-            estimation: false,
-            value: this.imageSize,
-          },
+    var proc = new Process()
+    var image = {
+      stream: fs.createReadStream( this.filename ),
+      size: {
+        original: this.imageSize,
+        final: {
+          estimation: false,
+          value: this.imageSize,
         },
-      }
+      },
+    }
 
-      function onUnmount() {
+    proc.drive = drive
 
-        proc.fd = fs.openSync( drive.raw, 'rs+' )
-        proc.drive = drive
-        proc.state = Process.STATE.FLASHING
-        proc.writer = new ImageWriter({
-          image: image,
-          fd: proc.fd,
-          path: drive.raw,
-          verify: true,
-          checksumAlgorithms: [ 'crc32' ]
-        })
+    var onUnmount = () => {
 
-        proc.writer
-          .on( 'progress', (state) => {
-            debug( 'progress', state )
-          })
-          .on( 'finish', () => {
-            debug( 'finish' )
-            fs.closeSync( proc.fd )
-            mountutils.unmountDisk( drive.device, (error) => {
-              debug( 'unmount:finish', error || 'OK' )
-              if( error ) throw error
-              // this.processes.delete( drive.device )
-            })
-          })
-
-      }
-
-      this.processes.set( drive.device, proc )
-
-      mountutils.unmountDisk( drive.device, (error) => {
-        debug( 'start:unmount', error || 'OK' )
-        if( error ) throw error
-        onUnmount()
-        process.nextTick(() => {
-          proc.writer.write()
-        })
+      proc.fd = fs.openSync( drive.raw, 'rs+' )
+      proc.writer = new ImageWriter({
+        image: image,
+        fd: proc.fd,
+        path: drive.raw,
+        verify: true,
+        checksumAlgorithms: [ 'crc32' ]
       })
 
+      proc.writer
+        .on( 'progress', (state) => {
+          debug( 'progress', state )
+        })
+        .on( 'finish', () => {
+          debug( 'finish' )
+          fs.closeSync( proc.fd )
+          mountutils.unmountDisk( drive.device, (error) => {
+            debug( 'unmount:finish', error || `OK ${proc.drive.device}` )
+            if( error ) throw error
+            setTimeout(() => {
+              this.processes.delete( drive.device )
+            }, 10e3)
+          })
+        })
+
+    }
+
+    this.processes.set( drive.device, proc )
+
+    mountutils.unmountDisk( drive.device, (error) => {
+      debug( 'start:unmount', error || `OK ${proc.drive.device}` )
+      if( error ) throw error
+      onUnmount()
+      process.nextTick(() => {
+        proc.writer.write()
+      })
     })
+
+  }
+
+  update(drives) {
+
+    const nextDrive = () => {
+      const drive = drives.shift()
+      if( drive != null ) {
+        this.flash(drive)
+        process.nextTick(nextDrive)
+      }
+    }
+
+    nextDrive()
+
   }
 
 }
@@ -170,15 +184,8 @@ class Process {
   constructor() {
     this.drive = null
     this.writer = null
-    this.state = Process.STATE.NONE
   }
 
-}
-
-Process.STATE = {
-  NONE: 0, // Init
-  FLASHING: 1, // Unmounting, writing, etc.
-  DONE: 2, // Done, but still attached
 }
 
 var hub = new Hub()

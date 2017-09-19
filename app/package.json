@@ -31,15 +31,18 @@
     "email": "carlo@resin.io",
     "url": "https://github.com/curcuz"
   },
-  "contributors": [{
-    "name": "jviotti",
-    "email": "juan@resin.io",
-    "url": "https://github.com/jviotti"
-  },{
-    "name": "jhermsmeier",
-    "email": "jonas@resin.io",
-    "url": "https://github.com/jhermsmeier"
-  }],
+  "contributors": [
+    {
+      "name": "jviotti",
+      "email": "juan@resin.io",
+      "url": "https://github.com/jviotti"
+    },
+    {
+      "name": "jhermsmeier",
+      "email": "jonas@resin.io",
+      "url": "https://github.com/jhermsmeier"
+    }
+  ],
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/resin-io-playground/etcher-headless/issues"
@@ -49,5 +52,18 @@
     "esnext": true,
     "strict": true
   },
-  "dependencies": {}
+  "dependencies": {
+    "blockmap": "github:resin-io-modules/blockmap#master",
+    "crc32-stream": "^2.0.0",
+    "debug": "^3.0.1",
+    "drivelist": "^5.1.8",
+    "lodash": "^4.17.4",
+    "mbr": "^1.1.2",
+    "mountutils": "^1.2.2",
+    "multi-progress": "^2.0.0",
+    "pipage": "^1.0.1",
+    "progress-stream": "^2.0.0",
+    "readable-stream": "^2.3.3",
+    "request": "^2.82.0"
+  }
 }

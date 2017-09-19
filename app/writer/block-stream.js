@@ -24,7 +24,7 @@ const debug = require('debug')('block-stream')
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-magic-numbers */
 
-const MIN_BLOCK_SIZE = 512
+const MIN_BLOCK_SIZE = 4096
 const CHUNK_SIZE = 64 * 1024
 
 /**
@@ -117,6 +117,8 @@ class BlockStream extends stream.Transform {
     const length = Math.ceil(this._bytes / this.blockSize) * this.blockSize
     const block = Buffer.alloc(length)
     let offset = 0
+
+    console.log( 'BLOCKSTREAM:FLUSH', length )
 
     for (let index = 0; index < this._buffers.length; index += 1) {
       this._buffers[index].copy(block, offset)
