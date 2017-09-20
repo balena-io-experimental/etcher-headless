@@ -7,6 +7,7 @@ var path = require('path')
 var EventEmitter = require('events')
 var mountutils = require('mountutils')
 var MBR = require('mbr')
+var color = require('colors-cli')
 
 var IMAGE_URL = process.env.IMAGE_URL
 
@@ -19,6 +20,136 @@ var DRIVE_BLACKLIST = process.env.DRIVE_BLACKLIST ?
 debug( 'IMAGE_URL', IMAGE_URL )
 debug( 'IMAGE_DATA_DIR', IMAGE_DATA_DIR )
 debug( 'DRIVE_BLACKLIST', DRIVE_BLACKLIST )
+
+const UNITS = [ 'B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' ]
+
+function prettybytes( num ) {
+
+  const prefix = num < 0 ? '-' : ''
+
+  num = num < 0 ? -num : num
+
+  if (num < 1) {
+    return prefix + num + ' B'
+  }
+
+  const exponent = Math.min( Math.floor( Math.log10( num ) / 3 ), UNITS.length - 1 )
+  const numStr = Number( ( num / Math.pow( 1024, exponent ) ).toFixed( 1 ) )
+  const unit = UNITS[ exponent ]
+
+  return prefix + numStr + ' ' + unit
+
+}
+
+class Meter {
+
+  constructor(stream) {
+    this.stream = stream
+    this.gauges = new Set()
+    this.content = ''
+    this.lines = 0
+    setInterval(() => {
+      this.render()
+    }, 300)
+    this.render()
+  }
+
+  createGauge( format, options ) {
+    var gauge = new Meter.Gauge( format, options )
+    gauge.meter = this
+    this.gauges.add( gauge )
+    return gauge
+  }
+
+  render() {
+
+    for( var i = 0; i < this.lines - 1; i++ ) {
+      this.stream.clearLine(0)
+      this.stream.moveCursor(0,-1)
+    }
+
+    this.content = ''
+    this.gauges.forEach((gauge) => {
+      this.content += gauge.render() + '\n'
+    })
+
+    this.lines = this.content.split( /\r?\n/g ).length
+    this.stream.cursorTo(0)
+    this.stream.write(this.content)
+
+  }
+
+  remove(gauge) {
+    this.gauges.delete(gauge)
+  }
+
+}
+
+Meter.Gauge = class Gauge {
+
+  constructor(format, options) {
+
+    this.format = format
+    this.width = options.width || 20
+    this.value = options.value || 0
+    this.total = options.total || 1
+    this.chars = {
+      complete: options.complete || '=',
+      incomplete: options.incomplete || '-',
+      head: options.head || ( options.complete || '=' ),
+    }
+
+    this.meter = null
+    this.message = ''
+    this.content = ''
+    this.needsUpdate = true
+
+  }
+
+  tick( delta, message ) {
+    this.needsUpdate = true
+    this.value += delta
+    this.message = message || this.message
+  }
+
+  render() {
+
+    if( !this.needsUpdate )
+      return this.content
+
+    var ratio = this.value / this.total
+    ratio = Math.min( Math.max( ratio, 0 ), 1 )
+
+    var percent = Math.floor( ratio * 100 )
+    var completeLength = Math.round( this.width * ratio )
+    var complete = ''
+    var incomplete = ''
+
+    complete = Array(Math.max(0, completeLength + 1))
+      .join(this.chars.complete)
+
+    incomplete = Array(Math.max(0, this.width - completeLength + 1))
+      .join(this.chars.incomplete)
+
+    if( completeLength > 0 ) {
+      complete = complete.slice(0, -1) + this.chars.head
+    }
+
+    this.needsUpdate = false
+    this.content = this.format.replace( ':bar', complete + incomplete )
+    this.content = this.content.replace( ':message', this.message )
+
+    return this.content
+
+  }
+
+  remove() {
+    this.meter.remove(this)
+  }
+
+}
+
+var progress = new Meter( process.stdout )
 
 class Hub extends EventEmitter {
 
@@ -47,7 +178,7 @@ class Hub extends EventEmitter {
   scan() {
     debug( 'scan' )
     drivelist.list(( error, drives ) => {
-      if( error ) throw error
+      if( error ) this.emit( 'error', error )
       drives = drives.filter(( drive ) => {
         return !~this.blacklist.indexOf( drive.device ) &&
           drive.system === false &&
@@ -108,6 +239,8 @@ class Hub extends EventEmitter {
     }
 
     var proc = new Process()
+    // var barFormat = `[:bar] :mode ${drive.device} | ${color.x87(':progress')} | ${color.green(':speed/s')} | ${color.x247('ETA :remaining')}`
+    var barFormat = `[:bar] :message`
     var image = {
       stream: fs.createReadStream( this.filename ),
       size: {
@@ -120,6 +253,19 @@ class Hub extends EventEmitter {
     }
 
     proc.drive = drive
+    proc.spinner = progress.createGauge( barFormat, {
+      complete: '=',
+      incomplete: ' ',
+      width: 20,
+      total: this.imageSize * 2,
+      clear: true,
+      callback: () => {
+        progressOutput.clearLine(0)
+        progressOutput.cursorTo(0)
+      }
+    })
+
+    proc.spinner.tick( 0, `[DETECTED] ${drive.device}` )
 
     var onUnmount = () => {
 
@@ -132,21 +278,42 @@ class Hub extends EventEmitter {
         checksumAlgorithms: [ 'crc32' ]
       })
 
-      proc.writer
-        .on( 'progress', (state) => {
-          debug( 'progress', state )
+      proc.writer.on( 'error', (error) => {
+        error.device = drive.device
+        this.emit( 'error', error )
+        proc.spinner.tick( 0, `[ERROR] ${error.message}`)
+        setTimeout(() => {
+          proc.spinner.remove()
+        }, 3e3 )
+        this.processes.delete( drive.device )
+      })
+      .on( 'progress', (state) => {
+        debug( 'progress', state )
+
+        var mode = state.type === 'write' ?
+          color.red_bt(' WRITE') :
+          color.yellow('VERIFY')
+        var speed = prettybytes( state.speed )
+        var eta = `${(state.eta / 60).toFixed(0)} min ${state.eta % 60} s`
+        var progress = state.percentage.toFixed(0) + '%'
+
+        proc.spinner.tick( state.delta, `${mode} ${drive.device} | ${progress} | ${speed}/s | ${eta}` )
+
+      })
+      .on( 'finish', () => {
+        debug( 'finish' )
+        fs.closeSync( proc.fd )
+        proc.spinner.tick( 1, '[FINISHED]')
+        mountutils.unmountDisk( drive.device, (error) => {
+          debug( 'unmount:finish', error || `OK ${proc.drive.device}` )
+          if( error ) this.emit( 'error', error )
+          proc.spinner.tick( 1, `[UNMOUNTED] ${drive.device}`)
+          setTimeout(() => {
+            this.processes.delete( drive.device )
+            proc.spinner.remove()
+          }, 10e3)
         })
-        .on( 'finish', () => {
-          debug( 'finish' )
-          fs.closeSync( proc.fd )
-          mountutils.unmountDisk( drive.device, (error) => {
-            debug( 'unmount:finish', error || `OK ${proc.drive.device}` )
-            if( error ) throw error
-            setTimeout(() => {
-              this.processes.delete( drive.device )
-            }, 10e3)
-          })
-        })
+      })
 
     }
 
@@ -154,7 +321,7 @@ class Hub extends EventEmitter {
 
     mountutils.unmountDisk( drive.device, (error) => {
       debug( 'start:unmount', error || `OK ${proc.drive.device}` )
-      if( error ) throw error
+      if( error ) this.emit( 'error', error )
       onUnmount()
       process.nextTick(() => {
         proc.writer.write()
@@ -168,6 +335,7 @@ class Hub extends EventEmitter {
     const nextDrive = () => {
       const drive = drives.shift()
       if( drive != null ) {
+        // var mbr = MBR.parse( fs.read )
         this.flash(drive)
         process.nextTick(nextDrive)
       }
@@ -189,3 +357,8 @@ class Process {
 }
 
 var hub = new Hub()
+
+hub.on('error', (error) => {
+  // console.error( `\n[ERROR] ${error.device ? error.device + ' ' : ''}${error.message}` )
+  debug( 'error', error )
+})
