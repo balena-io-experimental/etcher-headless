@@ -5,18 +5,7 @@ RUN apt-get update && apt-get install -y \
   build-essential \
   git \
   wget \
-  python-dev   \
-  i2c-tools \
-  dnsmasq \
-  hostapd \
-  iproute2 \
-  iw \
-  libdbus-1-dev \
-  libexpat-dev \
-  rfkill && rm -rf /var/lib/apt/lists/*
-
-# Save source folder
-RUN printf "%s\n" "${PWD##}" > SOURCEFOLDER
+  python-dev && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /usr/src/app/
 
@@ -24,23 +13,13 @@ RUN mkdir -p /usr/src/app/
 WORKDIR /usr/src/app
 
 # Move package to filesystem
-COPY "$SOURCEFOLDER/app/package.json" ./
+COPY ./app/package.json ./
 
 # Install NodeJS dependencies via NPM
 RUN JOBS=MAX npm i --unsafe-perm --production && npm cache clean
 
-# Move bower.json to filesystem
-COPY "$SOURCEFOLDER/app/bower.json $SOURCEFOLDER/app/.bowerrc" /usr/src/app/
-
-# Install
-RUN ./node_modules/.bin/bower --allow-root install \
-	&& ./node_modules/.bin/bower --allow-root cache clean
-
 # Move app to filesystem
-COPY "$SOURCEFOLDER/app" ./
-
-# Compile coffee
-RUN ./node_modules/.bin/coffee -c ./src
+COPY ./app ./
 
 # Start app
 CMD ["bash", "/usr/src/app/start.sh"]
