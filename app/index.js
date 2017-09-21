@@ -8,6 +8,7 @@ var EventEmitter = require('events')
 var mountutils = require('mountutils')
 var MBR = require('mbr')
 var color = require('colors-cli')
+var ProgressStream = require('progress-stream')
 
 var IMAGE_URL = process.env.IMAGE_URL
 
@@ -243,11 +244,36 @@ class Hub extends EventEmitter {
       console.log( 'fetch:download' )
     }
 
+    const imageSize = 2780290560
+
     var dest = fs.createWriteStream( this.filename )
     var onError = ( error ) => { this.emit( 'error', error ) }
+    var measure = new ProgressStream({
+      length: imageSize,
+      time: 500
+    })
+
+    var spinner = progress.createGauge( `[:bar] :message`, {
+      complete: '=',
+      incomplete: ' ',
+      width: 20,
+      total: imageSize,
+      clear: true,
+    })
+
+    measure.on( 'progress', (state) => {
+
+      var speed = prettybytes( state.speed )
+      var eta = `${(state.eta / 60).toFixed(0)} min ${state.eta % 60} s`
+      var progress = state.percentage.toFixed(0) + '%'
+
+      spinner.tick( state.delta, `${progress} | ${speed}/s | ${eta}` )
+
+    })
 
     request( IMAGE_URL )
       .on( 'error', onError )
+      .pipe( measure )
       .pipe( dest )
       .on( 'error', onError )
       .once( 'finish', () => {
