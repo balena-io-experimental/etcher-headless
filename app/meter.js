@@ -30,8 +30,6 @@ class Meter {
       this.content += gauge.render() + '\n'
     })
 
-    this.content = this.content.trim()
-
     this.lines = this.content.split( /\r?\n/g ).length
     this.stream.cursorTo(0)
     this.stream.write(this.content)
