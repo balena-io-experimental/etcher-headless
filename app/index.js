@@ -228,18 +228,19 @@ class Hub extends EventEmitter {
 
     this.filename = path.join( IMAGE_DATA_DIR, path.basename( IMAGE_URL ) )
 
-    debug( 'fetch', this.filename )
+    console.log( 'fetch', this.filename )
 
     try {
       var stats = fs.statSync( this.filename )
       if( stats.isFile() ) {
         this.imageSize = fs.statSync( this.filename ).size
-        debug( 'fetch:exists' )
+        console.log( 'fetch:exists' )
+        console.log( 'flashing', path.basename( this.filename ), `(${prettybytes(this.imageSize)})` )
         this.emit( 'ready' )
         return
       }
     } catch( error ) {
-      debug( 'fetch:download' )
+      console.log( 'fetch:download' )
     }
 
     var dest = fs.createWriteStream( this.filename )
@@ -250,8 +251,9 @@ class Hub extends EventEmitter {
       .pipe( dest )
       .on( 'error', onError )
       .once( 'finish', () => {
-        debug( 'finish' )
+        console.log( 'fetch:finish' )
         this.imageSize = fs.statSync( this.filename ).size
+        console.log( 'flashing', path.basename( this.filename ), `(${prettybytes(this.imageSize)})` )
         this.emit( 'ready' )
       })
 
