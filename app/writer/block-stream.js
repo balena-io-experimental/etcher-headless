@@ -118,8 +118,6 @@ class BlockStream extends stream.Transform {
     const block = Buffer.alloc(length)
     let offset = 0
 
-    console.log( 'BLOCKSTREAM:FLUSH', length )
-
     for (let index = 0; index < this._buffers.length; index += 1) {
       this._buffers[index].copy(block, offset)
       offset += this._buffers[index].length
