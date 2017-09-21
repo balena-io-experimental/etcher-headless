@@ -17,6 +17,8 @@ var IMAGE_URL = process.env.IMAGE_URL
 var IMAGE_DATA_DIR = process.env.IMAGE_DATA_DIR ?
   process.env.IMAGE_DATA_DIR : '/data'
 
+var VERIFY_IMAGE = process.env.VERIFY_IMAGE ? true : false
+
 var DRIVE_BLACKLIST = process.env.DRIVE_BLACKLIST ?
   process.env.DRIVE_BLACKLIST.split(',') : null
 
@@ -238,7 +240,7 @@ class Hub extends EventEmitter {
         // fd: proc.fd,
         flags: 'rs+',
         path: drive.raw,
-        verify: true,
+        verify: VERIFY_IMAGE,
         checksumAlgorithms: [ 'crc32' ]
       })
 
