@@ -41,6 +41,37 @@ function prettybytes( num ) {
 
 }
 
+function read( filename, length ) {
+  try {
+    var offset = 0
+    var position = 0
+    var buffer = Buffer.alloc( length, 0 )
+    var fd = fs.openSync( filename, 'rs' )
+    fs.readSync( fd, buffer, offset, length, position )
+    return buffer
+  } catch( error ) {
+    // we don't care
+    debug( 'read', error )
+  }
+}
+
+function isResinOS( drive ) {
+  var buffer = read( drive.device, 512 )
+  var partitions = 0
+  var mbr = null
+  try {
+    mbr = MBR.parse( buffer )
+    partitions = mbr.partitions.reduce((count, partition) => {
+      return partition.type ? count + 1 : count
+    }, 0 )
+    debug( 'mbr', mbr )
+    debug( 'partitions', partitions )
+  } catch( error ) {
+    debug( 'isResinOS', error )
+  }
+  return partitions > 2
+}
+
 class Meter {
 
   constructor(stream) {
@@ -269,10 +300,11 @@ class Hub extends EventEmitter {
 
     var onUnmount = () => {
 
-      proc.fd = fs.openSync( drive.raw, 'rs+' )
+      // proc.fd = fs.openSync( drive.raw, 'rs+' )
       proc.writer = new ImageWriter({
         image: image,
-        fd: proc.fd,
+        // fd: proc.fd,
+        flags: 'rs+',
         path: drive.raw,
         verify: true,
         checksumAlgorithms: [ 'crc32' ]
@@ -302,7 +334,7 @@ class Hub extends EventEmitter {
       })
       .on( 'finish', () => {
         debug( 'finish' )
-        fs.closeSync( proc.fd )
+        if( proc.fd ) fs.close( proc.fd, () => {})
         proc.spinner.tick( 1, '[FINISHED]')
         mountutils.unmountDisk( drive.device, (error) => {
           debug( 'unmount:finish', error || `OK ${proc.drive.device}` )
@@ -335,9 +367,16 @@ class Hub extends EventEmitter {
     const nextDrive = () => {
       const drive = drives.shift()
       if( drive != null ) {
-        // var mbr = MBR.parse( fs.read )
-        this.flash(drive)
-        process.nextTick(nextDrive)
+        if( isResinOS( drive ) ) {
+          debug( 'bail:isResinOS', drive.device )
+          return
+        }
+        if( drive.mountpoints.length === 0 ) {
+          debug( 'bail:unmounted', drive.device )
+          return
+        }
+        this.flash( drive )
+        process.nextTick( nextDrive )
       }
     }
 
@@ -359,6 +398,5 @@ class Process {
 var hub = new Hub()
 
 hub.on('error', (error) => {
-  // console.error( `\n[ERROR] ${error.device ? error.device + ' ' : ''}${error.message}` )
   debug( 'error', error )
 })

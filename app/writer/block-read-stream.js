@@ -83,6 +83,14 @@ class BlockReadStream extends stream.Readable {
    * // not to be called directly
    */
   _read () {
+
+    if (_.isNil(this.fd)) {
+      this.once('open', () => {
+        this._read()
+      })
+      return
+    }
+
     const toRead = this.end - this.position
 
     if (toRead <= 0) {
