@@ -27,7 +27,7 @@ class Meter {
 
     this.content = ''
     this.gauges.forEach((gauge) => {
-      this.content += '\n' + gauge.render()
+      this.content += gauge.render() + '\n'
     })
 
     this.content = this.content.trim()
