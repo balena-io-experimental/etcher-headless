@@ -65,6 +65,6 @@
     "pipage": "^1.0.1",
     "progress-stream": "^2.0.0",
     "readable-stream": "^2.3.3",
-    "request": "^2.82.0"
+    "simple-get": "^2.7.0"
   }
 }

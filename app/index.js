@@ -1,5 +1,5 @@
 var ImageWriter = require('./writer')
-var request = require('request')
+var request = require('simple-get')
 var drivelist = require('drivelist')
 var debug = require('debug')('multiwrite')
 var fs = require('fs')
@@ -166,17 +166,26 @@ class Hub extends EventEmitter {
 
     })
 
-    request( IMAGE_URL )
-      .on( 'error', onError )
-      .pipe( measure )
-      .pipe( dest )
-      .on( 'error', onError )
-      .once( 'finish', () => {
-        console.log( 'fetch:finish' )
-        this.imageSize = fs.statSync( this.filename ).size
-        console.log( 'flashing', path.basename( this.filename ), `(${prettybytes(this.imageSize)})` )
-        this.emit( 'ready' )
-      })
+    request( IMAGE_URL, ( error, response ) => {
+
+      if( error ) throw error
+      if( response.statusCode !== 200 ) {
+        throw new Error( `HTTP ${response.statusCode}` )
+      }
+
+      response
+        .on( 'error', onError )
+        .pipe( measure )
+        .pipe( dest )
+        .on( 'error', onError )
+        .once( 'finish', () => {
+          console.log( 'fetch:finish' )
+          this.imageSize = fs.statSync( this.filename ).size
+          console.log( 'flashing', path.basename( this.filename ), `(${prettybytes(this.imageSize)})` )
+          this.emit( 'ready' )
+        })
+
+    })
 
   }
 
