@@ -84,7 +84,7 @@ class BlockReadStream extends stream.Readable {
    */
   _read () {
 
-    if (_.isNil(this.fd)) {
+    if ((this.fd == null)) {
       this.once('open', () => {
         this._read()
       })
@@ -142,7 +142,7 @@ class BlockReadStream extends stream.Readable {
   open () {
     debug('open')
 
-    if (!_.isNil(this.fd)) {
+    if (!(this.fd == null)) {
       this.emit('open', this.fd)
       return
     }
@@ -175,8 +175,8 @@ class BlockReadStream extends stream.Readable {
       this.once('close', callback)
     }
 
-    if (this.closed || _.isNil(this.fd)) {
-      if (_.isNil(this.fd)) {
+    if (this.closed || (this.fd == null)) {
+      if ((this.fd == null)) {
         this.once('open', () => {
           this.close()
         })

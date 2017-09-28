@@ -166,7 +166,7 @@ class ImageWriter extends EventEmitter {
     const source = image.stream
     const progressOptions = {
       length: image.size.original,
-      time: 500
+      time: 1000
     }
 
     let progressStream = null
@@ -202,11 +202,11 @@ class ImageWriter extends EventEmitter {
       pipeline.append(new BlockMap.FilterStream(blockMap))
     } else {
       debug('write:blockstream')
-      const checksumStream = new ChecksumStream({
-        algorithms: options.checksumAlgorithms
-      })
-      pipeline.append(checksumStream)
-      pipeline.bind(checksumStream, 'checksum')
+      // const checksumStream = new ChecksumStream({
+      //   algorithms: options.checksumAlgorithms
+      // })
+      // pipeline.append(checksumStream)
+      // pipeline.bind(checksumStream, 'checksum')
       pipeline.append(new BlockStream())
     }
 

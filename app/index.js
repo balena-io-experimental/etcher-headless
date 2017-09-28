@@ -107,7 +107,10 @@ class Hub extends EventEmitter {
   scan() {
     debug( 'scan' )
     drivelist.list(( error, drives ) => {
-      if( error ) this.emit( 'error', error )
+      if( error ) {
+        this.emit( 'error', error )
+        return
+      }
       drives = drives.filter(( drive ) => {
         return !~this.blacklist.indexOf( drive.device ) &&
           drive.system === false &&
@@ -117,7 +120,7 @@ class Hub extends EventEmitter {
       debug( 'drives %O', error || drives )
       this.update(drives)
       if( this.running ) {
-        this.scan()
+        setTimeout(() => this.scan(), 2000)
       }
     })
   }
@@ -143,12 +146,14 @@ class Hub extends EventEmitter {
 
     const imageSize = 2780290560
 
-    var dest = fs.createWriteStream( this.filename )
+    var dest = fs.createWriteStream( this.filename, { flags: 'w+' })
     var onError = ( error ) => { this.emit( 'error', error ) }
     var measure = new ProgressStream({
       length: imageSize,
       time: 500
     })
+
+    dest.on( 'error', onError )
 
     var spinner = progress.createGauge( `[:bar] :message`, {
       complete: '=',
@@ -178,7 +183,6 @@ class Hub extends EventEmitter {
       response
         .on( 'error', onError )
         .pipe( measure )
-        .pipe( dest )
         .on( 'error', onError )
         .once( 'finish', () => {
           console.log( 'fetch:finish' )
@@ -263,7 +267,9 @@ class Hub extends EventEmitter {
         var eta = `${(state.eta / 60).toFixed(0)} min ${state.eta % 60} s`
         var progress = state.percentage.toFixed(0) + '%'
 
-        proc.spinner.tick( state.delta, `${mode} ${drive.device} | ${progress} | ${speed}/s | ${eta}` )
+        console.log( speed )
+
+        // proc.spinner.tick( state.delta, `${mode} ${drive.device} | ${progress} | ${speed}/s | ${eta}` )
 
       })
       .on( 'finish', () => {

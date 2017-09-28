@@ -5,10 +5,10 @@ class Meter {
     this.gauges = new Set()
     this.content = ''
     this.lines = 0
-    setInterval(() => {
-      this.render()
-    }, 300)
-    this.render()
+    // setInterval(() => {
+    //   this.render()
+    // }, 300)
+    // this.render()
   }
 
   createGauge( format, options ) {
@@ -18,7 +18,9 @@ class Meter {
     return gauge
   }
 
-  render() {
+  render() {}
+
+  __render() {
 
     for( var i = 0; i < this.lines - 1; i++ ) {
       this.stream.clearLine(0)

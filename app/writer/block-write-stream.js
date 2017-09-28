@@ -92,7 +92,7 @@ class BlockWriteStream extends stream.Writable {
    */
   _write (chunk, encoding, next) {
     // Wait for file handle to be open
-    if (_.isNil(this.fd)) {
+    if ((this.fd == null)) {
       this.once('open', () => {
         this._write(chunk, encoding, next)
       })
@@ -102,7 +102,7 @@ class BlockWriteStream extends stream.Writable {
     this.bytesRead += chunk.length
     this.blocksRead += 1
 
-    if (_.isNil(chunk.position)) {
+    if ((chunk.position == null)) {
       chunk.position = this.position
     }
 
@@ -181,7 +181,7 @@ class BlockWriteStream extends stream.Writable {
   open () {
     debug('open')
 
-    if (!_.isNil(this.fd)) {
+    if (!(this.fd == null)) {
       this.emit('open', this.fd)
       return
     }
@@ -214,8 +214,8 @@ class BlockWriteStream extends stream.Writable {
       this.once('close', callback)
     }
 
-    if (this.closed || _.isNil(this.fd)) {
-      if (_.isNil(this.fd)) {
+    if (this.closed || (this.fd == null)) {
+      if ((this.fd == null)) {
         this.once('open', () => {
           this.close()
         })
